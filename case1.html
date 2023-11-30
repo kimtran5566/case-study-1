@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management</title>
+    <style>
+        /* Style cho modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        /* Style cho form trong modal */
+        #employeeFormInModal label {
+            display: block;
+            margin: 10px 0;
+        }
+
+        #employeeFormInModal input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+        }
+
+        /* Style cho button */
+        #showModalBtn, #closeModalBtn, #reviewEmployeeBtn {
+            margin-top: 20px;
+        }
+
+        /* Style cho table */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Nút mở modal -->
+<button id="showModalBtn">Thêm nhân viên</button>
+
+<!-- Modal -->
+<div id="myModal" class="modal">
+
+    <!-- Nội dung của modal -->
+    <div class="modal-content">
+        <!-- Form nhập thông tin nhân viên -->
+        <form id="employeeFormInModal">
+            <label for="id">ID:</label>
+            <input type="text" id="id" name="id" required>
+
+            <label for="fullName">Tên đầy đủ:</label>
+            <input type="text" id="fullName" name="fullName" required>
+
+            <label for="baseSalary">Lương cơ bản:</label>
+            <input type="number" id="baseSalary" name="baseSalary" required>
+
+            <label for="productQuantity">Số lượng sản phẩm:</label>
+            <input type="number" id="productQuantity" name="productQuantity" required>
+
+            <button type="button" onclick="addEmployee()">Thêm nhân viên</button>
+            <button type="button" id="closeModalBtn" onclick="closeModal()">Đóng</button>
+        </form>
+    </div>
+
+</div>
+
+<!-- Nút Review Employee -->
+<button id="reviewEmployeeBtn" onclick="reviewEmployees()">Review Employee</button>
+
+<!-- Hiển thị danh sách nhân viên -->
+<table id="employeeTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tên đầy đủ</th>
+            <th>Lương cơ bản</th>
+            <th>Lương sản phẩm</th>
+            <th>Số lượng sản phẩm</th>
+            <th>Lương tổng cộng</th>
+        </tr>
+    </thead>
+    <tbody id="employeeTableBody"></tbody>
+</table>
+
+<script>
+    // Khởi tạo danh sách nhân viên
+    let employees = [];
+
+    // Nút mở modal
+    let showModalBtn = document.getElementById("showModalBtn");
+    showModalBtn.addEventListener("click", function () {
+        document.getElementById("myModal").style.display = "block";
+    });
+
+    // Hàm để thêm nhân viên mới
+    function addEmployee() {
+        // Lấy giá trị từ form trong modal
+        let id = document.getElementById("id").value;
+        let fullName = document.getElementById("fullName").value;
+        let baseSalary = parseFloat(document.getElementById("baseSalary").value);
+        let productQuantity = parseInt(document.getElementById("productQuantity").value);
+
+        // Lương sản phẩm cố định cho tất cả nhân viên
+        let productSalary = 500;
+
+        // Tạo đối tượng nhân viên và thêm vào danh sách
+        let employee = {
+            id: id,
+            fullName: fullName,
+            baseSalary: baseSalary,
+            productSalary: productSalary,
+            productQuantity: productQuantity
+        };
+
+        employees.push(employee);
+
+        // Đóng modal sau khi thêm nhân viên
+        closeModal();
+    }
+
+    // Hàm để đóng modal
+    function closeModal() {
+        document.getElementById("myModal").style.display = "none";
+    }
+
+    // Hàm để hiển thị danh sách nhân viên trong bảng
+    function displayEmployees() {
+        let employeeTableBody = document.getElementById("employeeTableBody");
+        // Xóa nội dung cũ trong bảng
+        employeeTableBody.innerHTML = "";
+
+        // Thêm dữ liệu mới vào bảng
+        for (let i = 0; i < employees.length; i++) {
+            let row = employeeTableBody.insertRow();
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+            let cell4 = row.insertCell(3);
+            let cell5 = row.insertCell(4);
+            let cell6 = row.insertCell(5);
+
+            cell1.innerHTML = employees[i].id;
+            cell2.innerHTML = employees[i].fullName;
+            cell3.innerHTML = employees[i].baseSalary;
+            cell4.innerHTML = employees[i].productSalary;
+            cell5.innerHTML = employees[i].productQuantity;
+
+            // Tính lương tổng cộng
+            let totalSalary = calculateTotalSalary(employees[i]);
+            cell6.innerHTML = totalSalary;
+        }
+    }
+
+    // Hàm tính lương tổng cộng
+    function calculateTotalSalary(employee) {
+        let totalSalary = employee.baseSalary + (employee.productSalary * employee.productQuantity);
+
+        // Chỉ tiêu sản phẩm mỗi tháng là 50
+        const targetProduct = 50;
+
+        // Giảm lương 10% nếu sản phẩm ít hơn 50
+        if (employee.productQuantity < targetProduct) {
+            totalSalary *= 0.9;
+        }
+
+        // Cộng thêm 10% lương sản phẩm cho mỗi sản phẩm vượt quá 50
+        if (employee.productQuantity > targetProduct) {
+            let extraProduct = employee.productQuantity - targetProduct;
+            totalSalary += (extraProduct * 0.1 * employee.productSalary);
+        }
+
+        return totalSalary.toFixed(2); // Để làm tròn đến 2 chữ số sau dấu thập phân
+    }
+
+    // Hàm để review danh sách nhân viên
+    function reviewEmployees() {
+        // Hiển thị danh sách nhân viên với thông tin lương
+        displayEmployees();
+    }
+</script>
+
+</body>
+</html>
